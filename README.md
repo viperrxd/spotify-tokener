@@ -49,6 +49,7 @@ plugins:
     spotify:
       clientId: "your_spotify_client_id"
       clientSecret: "your_spotify_client_secret"
+      preferPartnerApi: true # to use customTokenEndpoint it should be true
       customTokenEndpoint: "https://your-app.up.railway.app/api/token"
 ```
 
