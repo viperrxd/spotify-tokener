@@ -5,7 +5,7 @@ const puppeteer = require("puppeteer");
 const PORT = process.env.PORT || 8080;
 const SPOTIFY_URL = "https://open.spotify.com";
 const SPOTIFY_TOKEN_URL = `${SPOTIFY_URL}/api/token`;
-const SELF_PING_INTERVAL = 14 * 60 * 1000; // 14 minutes — keeps Render free tier alive
+const SELF_PING_INTERVAL = 14 * 60 * 1000; // 14 minutes — keeps free tier alive
 const TOKEN_REFRESH_BUFFER = 5 * 60 * 1000; // Refresh 5 min before expiry
 
 // ─── State ───────────────────────────────────────────────────────────────────
@@ -38,11 +38,18 @@ async function launchBrowser() {
       "--disable-sync",
       "--disable-translate",
       "--no-first-run",
-      "--single-process",
+      "--disable-crash-reporter",
+      "--disable-breakpad",
+      "--disable-component-update",
+      "--disable-features=VizDisplayCompositor,CrashReporting",
     ],
+    env: {
+      ...process.env,
+      CHROME_CRASHPAD_PIPE_NAME: "",
+    },
   };
 
-  // Use system Chromium when set (Docker/Render)
+  // Use system Chromium when set (Docker/Railway)
   if (process.env.PUPPETEER_EXECUTABLE_PATH) {
     launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
   }
@@ -193,7 +200,7 @@ app.get("/api/token", async (req, res) => {
   }
 });
 
-// GET /health — health check for Render
+// GET /health — health check
 app.get("/health", (req, res) => {
   res.json({
     status: "ok",
@@ -215,16 +222,16 @@ app.get("/", (req, res) => {
       token: "/api/token",
       health: "/health",
     },
-    usage:
-      'Set customTokenEndpoint in your LavaSrc config to "https://your-app.onrender.com/api/token"',
   });
 });
 
-// ─── Self-Ping (keeps Render free tier alive) ────────────────────────────────
+// ─── Self-Ping (keeps free tier alive) ───────────────────────────────────────
 function startSelfPing() {
-  if (!process.env.RENDER_EXTERNAL_URL) return; // Only on Render
+  const externalUrl = process.env.RAILWAY_PUBLIC_DOMAIN || process.env.RENDER_EXTERNAL_URL;
+  if (!externalUrl) return;
 
-  const url = `${process.env.RENDER_EXTERNAL_URL}/health`;
+  const protocol = externalUrl.startsWith("http") ? "" : "https://";
+  const url = `${protocol}${externalUrl}/health`;
   console.log(`[ping] Self-ping enabled every 14 min → ${url}`);
 
   setInterval(async () => {

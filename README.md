@@ -1,8 +1,11 @@
 # 🎵 Spotify Token Server
 
-A lightweight server that provides Spotify anonymous access tokens for **LavaSrc / Lavalink** integration.
+A Node.js port of [**topi314/spotify-tokener**](https://github.com/topi314/spotify-tokener) — provides Spotify anonymous access tokens for **LavaSrc / Lavalink** integration.
 
-Drop-in replacement for Spotify's default token endpoint that **actually works**.
+> **Credits:** Originally created by [topi314](https://github.com/topi314) in Go. This is a Node.js reimplementation for easier deployment on platforms like Railway.  
+> Original repository: [github.com/topi314/spotify-tokener](https://github.com/topi314/spotify-tokener) • Licensed under [Apache-2.0](https://github.com/topi314/spotify-tokener/blob/master/LICENSE)
+
+---
 
 ## How It Works
 
@@ -16,52 +19,27 @@ No Spotify credentials needed — uses anonymous tokens.
 
 ---
 
-## 🚀 Deploy to Render (Free)
+## 🚀 Deploy to Railway
 
-### Step 1: Push to GitHub
+1. Push this repo to GitHub
+2. Go to [railway.app](https://railway.app) → **New Project** → **Deploy from GitHub Repo**
+3. Select your repo — Railway auto-detects the `Dockerfile`
+4. After deploy: **Settings** → **Networking** → **Generate Domain**
+5. Use your domain in LavaSrc config
 
-Create a new GitHub repo and push this project:
+---
 
-```bash
-git init
-git add .
-git commit -m "Initial commit"
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/spotify-tokener.git
-git push -u origin main
-```
+## 📡 API Endpoints
 
-### Step 2: Deploy on Render
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/token` | Returns Spotify anonymous token (LavaSrc-compatible) |
+| `GET` | `/health` | Health check with uptime & cache info |
+| `GET` | `/` | Service info |
 
-1. Go to [render.com](https://render.com) and sign in
-2. Click **"New +"** → **"Web Service"**
-3. Connect your GitHub repo (`spotify-tokener`)
-4. Configure:
-   - **Name**: `spotify-tokener`
-   - **Region**: Pick closest to your Lavalink server
-   - **Runtime**: **Docker**
-   - **Instance Type**: **Free**
-5. Click **"Deploy Web Service"**
+---
 
-> ⏳ First deploy takes ~5 minutes (building Docker image with Chrome)
-
-### Step 3: Get Your URL
-
-After deploy, Render gives you a URL like:
-```
-https://spotify-tokener-xxxx.onrender.com
-```
-
-Test it by visiting:
-```
-https://spotify-tokener-xxxx.onrender.com/api/token
-```
-
-You should see a JSON response with `accessToken`, `clientId`, etc.
-
-### Step 4: Configure LavaSrc
-
-Update your Lavalink `application.yml`:
+## LavaSrc Config
 
 ```yaml
 plugins:
@@ -71,70 +49,26 @@ plugins:
     spotify:
       clientId: "your_spotify_client_id"
       clientSecret: "your_spotify_client_secret"
-      customTokenEndpoint: "https://spotify-tokener-xxxx.onrender.com/api/token"
-```
-
-Replace `spotify-tokener-xxxx.onrender.com` with your actual Render URL.
-
----
-
-## 📡 API Endpoints
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/api/token` | Returns Spotify anonymous token (LavaSrc-compatible) |
-| `GET` | `/health` | Health check with uptime, browser status, cache info |
-| `GET` | `/` | Service info |
-
-### Token Response Format
-
-```json
-{
-  "clientId": "d8a5ed958d274c2e8ee717e6a4b0971d",
-  "accessToken": "BQD...long_token_here",
-  "accessTokenExpirationTimestampMs": 1234567890000,
-  "isAnonymous": true
-}
+      customTokenEndpoint: "https://your-app.up.railway.app/api/token"
 ```
 
 ---
 
-## 🖥️ Run Locally (for testing)
+## 🖥️ Run Locally
 
 ```bash
-# Install dependencies (downloads Chromium automatically)
 npm install
-
-# Start the server
 node server.js
-```
-
-Server starts at `http://localhost:8080`. Test with:
-```bash
-curl http://localhost:8080/api/token
+# → http://localhost:8080/api/token
 ```
 
 ---
 
-## ⚠️ Render Free Tier Notes
+## Credits & License
 
-- Free instances **sleep after 15 minutes of inactivity**
-- This server has a **built-in self-ping** that keeps it awake automatically
-- The self-ping uses `RENDER_EXTERNAL_URL` (auto-set by Render)
-- First request after a cold start takes ~10-15 seconds (Chrome startup)
+This project is a Node.js reimplementation inspired by:
 
----
+- **[topi314/spotify-tokener](https://github.com/topi314/spotify-tokener)** by [topi314](https://github.com/topi314) — Original Go implementation
+- Licensed under [Apache License 2.0](https://github.com/topi314/spotify-tokener/blob/master/LICENSE)
 
-## 🔧 Environment Variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `PORT` | `8080` | Server port (Render sets this automatically) |
-| `PUPPETEER_EXECUTABLE_PATH` | _(auto)_ | Path to Chrome (set in Dockerfile for Docker) |
-| `RENDER_EXTERNAL_URL` | _(auto)_ | Your Render URL (auto-set, enables self-ping) |
-
----
-
-## License
-
-MIT
+All credit for the concept, approach, and original implementation goes to **topi314**.

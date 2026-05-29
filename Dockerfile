@@ -33,17 +33,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     xdg-utils \
     && rm -rf /var/lib/apt/lists/*
 
-# Tell Puppeteer to skip downloading Chrome and use the installed one
+# Tell Puppeteer to use system Chromium
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
+    CHROME_CRASHPAD_PIPE_NAME="" \
+    CHROME_DEVEL_SANDBOX=""
 
 WORKDIR /app
 
 COPY --from=build /app .
 
-# Create non-root user for security
+# Create non-root user + writable dirs for Chrome
 RUN groupadd -r appuser && useradd -r -g appuser -G audio,video appuser \
-    && chown -R appuser:appuser /app
+    && mkdir -p /home/appuser/.config/chromium \
+    && mkdir -p /tmp/chrome-crashpad \
+    && chown -R appuser:appuser /app /home/appuser /tmp/chrome-crashpad
 
 USER appuser
 
