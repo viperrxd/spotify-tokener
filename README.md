@@ -19,7 +19,29 @@ No Spotify credentials needed — uses anonymous tokens.
 
 ---
 
-## 🚀 Deploy to Railway
+## 🚀 Installation & Deployment
+
+### Option 1: Docker (VPS / Local) - *Recommended*
+
+Just like the original, you can run this easily via Docker. A pre-built image is available on the GitHub Container Registry (`ghcr.io`).
+
+Create a `compose.yml` file:
+
+```yaml
+services:
+  spotify-tokener:
+    image: ghcr.io/viperxd/spotify-tokener:latest
+    container_name: spotify-tokener
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+```
+Then run:
+```bash
+docker compose up -d
+```
+
+### Option 2: Deploy to Railway (Free Hosting)
 
 1. Push this repo to GitHub
 2. Go to [railway.app](https://railway.app) → **New Project** → **Deploy from GitHub Repo**
@@ -49,13 +71,12 @@ plugins:
     spotify:
       clientId: "your_spotify_client_id"
       clientSecret: "your_spotify_client_secret"
-      preferPartnerApi: true # to use customTokenEndpoint it should be true
-      customTokenEndpoint: "https://your-app.up.railway.app/api/token"
+      customTokenEndpoint: "https://your-app.up.railway.app/api/token" # Or http://localhost:8080/api/token if using Docker
 ```
 
 ---
 
-## 🖥️ Run Locally
+## 🖥️ Run Locally (Manual)
 
 ```bash
 npm install
