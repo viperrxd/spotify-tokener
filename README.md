@@ -1,31 +1,31 @@
-# 🎵 Spotify Token Server
-
-A Node.js port of [**topi314/spotify-tokener**](https://github.com/topi314/spotify-tokener) — provides Spotify anonymous access tokens for **LavaSrc / Lavalink** integration.
-
-> **Credits:** Originally created by [topi314](https://github.com/topi314) in Go. This is a Node.js reimplementation for easier deployment on platforms like Railway.  
-> Original repository: [github.com/topi314/spotify-tokener](https://github.com/topi314/spotify-tokener) • Licensed under [Apache-2.0](https://github.com/topi314/spotify-tokener/blob/master/LICENSE)
-
----
-
-## How It Works
-
-1. Launches headless Chrome via Puppeteer
-2. Navigates to `open.spotify.com` (like a real browser)
-3. Intercepts the `/api/token` network response
-4. Caches the token and serves it at `GET /api/token`
-5. Auto-refreshes before expiry
-
-No Spotify credentials needed — uses anonymous tokens.
+<div align="center">
+  <h1>🎵 Spotify Token Server for Lavalink</h1>
+  <p><strong>The ultimate, zero-config solution to bypass Spotify's token restrictions.</strong></p>
+  <p>Keep your music bots playing without interruptions. Seamlessly integrates with <a href="https://github.com/topi314/LavaSrc">LavaSrc</a> and <a href="https://github.com/lavalink-devs/Lavalink">Lavalink</a>.</p>
+</div>
 
 ---
 
-## 🚀 Installation & Deployment
+## ✨ Features
 
-### Option 1: Docker (VPS / Local) - *Recommended*
+- **Anonymous Access:** No need for personal Spotify credentials or premium accounts.
+- **Auto-Caching & Refresh:** Automatically handles token rotation in the background so your music never stops.
+- **Seamless Integration:** Built specifically to act as a `customTokenEndpoint` for the [LavaSrc](https://github.com/topi314/LavaSrc) plugin.
+- **Deploy Anywhere:** Ready for instant deployment in any Docker environment.
 
-Just like the original, you can run this easily via Docker. A pre-built image is available on the GitHub Container Registry (`ghcr.io`).
+---
 
-Create a `compose.yml` file:
+## 🛠️ How It Works
+
+Behind the scenes, this server uses headless Chrome (via Puppeteer) to act like a real browser navigating to Spotify. It intercepts the network traffic, snags the fresh anonymous access token, caches it, and serves it directly to [LavaSrc](https://github.com/topi314/LavaSrc) via a fast API.
+
+---
+
+## 🚀 Getting Started
+
+The absolute easiest way to run this is via our pre-built Docker image. 
+
+Create a `compose.yml` file on your server:
 
 ```yaml
 services:
@@ -36,32 +36,16 @@ services:
     ports:
       - "8080:8080"
 ```
-Then run:
+Then start it up:
 ```bash
 docker compose up -d
 ```
 
-### Option 2: Deploy to Railway (Free Hosting)
-
-1. Push this repo to GitHub
-2. Go to [railway.app](https://railway.app) → **New Project** → **Deploy from GitHub Repo**
-3. Select your repo — Railway auto-detects the `Dockerfile`
-4. After deploy: **Settings** → **Networking** → **Generate Domain**
-5. Use your domain in LavaSrc config
-
 ---
 
-## 📡 API Endpoints
+## 🎧 Lavalink Configuration
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/api/token` | Returns Spotify anonymous token (LavaSrc-compatible) |
-| `GET` | `/health` | Health check with uptime & cache info |
-| `GET` | `/` | Service info |
-
----
-
-## LavaSrc Config
+Once your server is running, just tell [LavaSrc](https://github.com/topi314/LavaSrc) where to find it. Add your URL to your [Lavalink](https://github.com/lavalink-devs/Lavalink) `application.yml`:
 
 ```yaml
 plugins:
@@ -71,26 +55,34 @@ plugins:
     spotify:
       clientId: "your_spotify_client_id"
       clientSecret: "your_spotify_client_secret"
-      customTokenEndpoint: "https://your-app.up.railway.app/api/token" # Or http://localhost:8080/api/token if using Docker
+      
+      # Put your new token server URL here!
+      preferPartnerApi: true # (This must be true to use a custom token endpoint)
+      customTokenEndpoint: "http://your-server-ip:8080/api/token" 
 ```
 
 ---
 
-## 🖥️ Run Locally (Manual)
+## 📡 API Reference
+
+| Method | Endpoint | Description |
+|--------|------|-------------|
+| `GET` | `/api/token` | Returns the Spotify anonymous token JSON (LavaSrc-compatible). |
+| `GET` | `/health` | Server health check, uptime, and cache expiration info. |
+| `GET` | `/` | Basic service info. |
+
+---
+
+## 🖥️ Manual Installation (For Developers)
+
+Want to run it from source?
 
 ```bash
+# Install dependencies
 npm install
+
+# Start the server
 node server.js
-# → http://localhost:8080/api/token
+
+# Your endpoint is now live at: http://localhost:8080/api/token
 ```
-
----
-
-## Credits & License
-
-This project is a Node.js reimplementation inspired by:
-
-- **[topi314/spotify-tokener](https://github.com/topi314/spotify-tokener)** by [topi314](https://github.com/topi314) — Original Go implementation
-- Licensed under [Apache License 2.0](https://github.com/topi314/spotify-tokener/blob/master/LICENSE)
-
-All credit for the concept, approach, and original implementation goes to **topi314**.
